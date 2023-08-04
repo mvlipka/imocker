@@ -17,17 +17,17 @@ func TestParseFile(t *testing.T) {
 	assert.NoError(t, err)
 	require.Len(t, mocks, 1)
 
-	require.Len(t, mocks[0].Methods, 1)
+	require.Len(t, mocks[0].Methods, 2)
 	require.Contains(t, mocks[0].Methods, "MyFunc")
 
 	myFunc := mocks[0].Methods["MyFunc"]
 	assert.Len(t, myFunc.NamedParams, 1)
-	require.Contains(t, myFunc.NamedParams, "param")
-	assert.Contains(t, myFunc.NamedParams["param"], "string")
+	require.Contains(t, myFunc.NamedParams[0].Name, "param")
+	assert.Contains(t, myFunc.NamedParams[0].Type, "string")
 
-	assert.Len(t, myFunc.UnNamedReturns, 1)
-	require.Len(t, myFunc.UnNamedReturns, 1)
-	assert.Contains(t, myFunc.UnNamedReturns[0], "error")
+	require.Len(t, myFunc.UnNamedReturns, 2)
+	assert.Contains(t, myFunc.UnNamedReturns[0], "string")
+	assert.Contains(t, myFunc.UnNamedReturns[1], "error")
 }
 
 func TestGenerateTemplate(t *testing.T) {
@@ -36,8 +36,11 @@ func TestGenerateTemplate(t *testing.T) {
 		Name:    "TestStruct",
 		Methods: map[string]Method{
 			"TestMethod": {
-				NamedParams: map[string]string{
-					"test": "string",
+				NamedParams: []NamedParam{
+					{
+						Name: "test",
+						Type: "string",
+					},
 				},
 				NamedReturns:  nil,
 				UnNamedParams: nil,
@@ -49,5 +52,5 @@ func TestGenerateTemplate(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, "\npackage testmock\n\ntype MockTestStruct struct {\n\t\n\tTestTestMethod func(test string) (error)\n\t\n}\n\n\nfunc (m *MockTestStruct) TestMethod(test string) (error) {\n\treturn m.TestTestMethod(test)\n}\n\n", output)
+	assert.Equal(t, "\npackage testmock\n\ntype MockTestStruct struct {\n\t\n\tTestTestMethod func(test string) (error)\n\t\n}\n\n\n\tfunc (m *MockTestStruct) TestMethod(test string) (error) {\n\t\t\treturn m.TestTestMethod(test)\n\t}\n\n", output)
 }

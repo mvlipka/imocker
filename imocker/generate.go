@@ -17,12 +17,18 @@ type Mock struct {
 }
 
 type Method struct {
-	NamedParams    map[string]string
-	NamedReturns   map[string]string
+	NamedParams    []NamedParam
+	NamedReturns   []NamedParam
 	UnNamedParams  []string
 	UnNamedReturns []string
 }
 
+type NamedParam struct {
+	Name string
+	Type string
+}
+
+// ParseMock reads a Go source file and builds a Mock object through parsing the file's AST
 func ParseMock(reader io.Reader) ([]Mock, error) {
 	src, err := io.ReadAll(reader)
 	if err != nil {
@@ -61,8 +67,8 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 					switch methodTyp := method.Type.(type) {
 					case *ast.FuncType:
 						mockMethod := Method{
-							NamedParams:    make(map[string]string),
-							NamedReturns:   make(map[string]string),
+							NamedParams:    make([]NamedParam, 0),
+							NamedReturns:   make([]NamedParam, 0),
 							UnNamedParams:  make([]string, 0),
 							UnNamedReturns: make([]string, 0),
 						}
@@ -73,7 +79,10 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							switch paramTyp := param.Type.(type) {
 							case *ast.Ident:
 								if len(param.Names) > 0 {
-									mockMethod.NamedParams[param.Names[0].Name] = paramTyp.Name
+									mockMethod.NamedParams = append(mockMethod.NamedParams, NamedParam{
+										Name: param.Names[0].Name,
+										Type: paramTyp.Name,
+									})
 								} else {
 									mockMethod.UnNamedParams = append(mockMethod.UnNamedParams, paramTyp.Name)
 								}
@@ -89,7 +98,10 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							switch retTyp := ret.Type.(type) {
 							case *ast.Ident:
 								if len(ret.Names) > 0 {
-									mockMethod.NamedReturns[ret.Names[0].Name] = retTyp.Name
+									mockMethod.NamedReturns = append(mockMethod.NamedReturns, NamedParam{
+										Name: ret.Names[0].Name,
+										Type: retTyp.Name,
+									})
 								} else {
 									mockMethod.UnNamedReturns = append(mockMethod.UnNamedReturns, retTyp.Name)
 								}
@@ -120,8 +132,9 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 	return mocks, nil
 }
 
+// GenerateTemplate compiles the template and generates a mock
 func GenerateTemplate(mock Mock) (string, error) {
-	t := template.Must(template.New("mock").Parse(mockTemplate))
+	t := template.Must(template.New("mock").Funcs(templateHelpers).Parse(mockTemplate))
 
 	buf := bytes.NewBufferString("")
 
