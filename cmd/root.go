@@ -8,11 +8,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "commands",
-	Short:   "commands is a Golang mock struct generator",
+	Use:     "imocker",
+	Short:   "imocker is a Golang mock struct generator",
 	Long:    "A mock struct generator and implementor for interfaces",
 	Run:     rootRun,
-	Example: "commands generate ./...",
+	Example: "imocker generate ./...",
 }
 
 func init() {
