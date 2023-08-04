@@ -1,4 +1,7 @@
 # imocker
+[![Go Reference](https://pkg.go.dev/badge/image)](https://pkg.go.dev/github.com/ncruces/go-strftime)
+[![Go Report](https://goreportcard.com/badge/github.com/mvlipka/imocker)](https://goreportcard.com/report/github.com/mvlipka/imocker)
+[![Go Coverage](https://github.com/mvlipka/imocker/wiki/coverage.svg)](https://raw.githack.com/wiki/mvlipka/imocker/coverage.html)
 
 ## Overview
 imocker is a tool designed to generate mock structs that implement any interface in order to effectively write unit tests.
