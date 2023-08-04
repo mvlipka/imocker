@@ -14,6 +14,7 @@ imocker generates actual Go code that can be used in unit tests without using st
 
 ## Usage
 ```
+imocker
 imocker generate ./...
 imocker generate ./testdata
 ```
