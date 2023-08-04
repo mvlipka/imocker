@@ -49,6 +49,6 @@ func (m *MockThinger) NamedReturn(multiple bool, types bool) (err error) {
 
 # Current Limitations
 * `MyMethod(multiple, vars bool) (error)`
-  * Methods with multiple parameters defined are unsupported
+  * Methods with multiple parameters under a single type definition are unsupported
 * `MyMethod(bool, bool) (error)`
   * Methods with no parameter names defined are unsupported

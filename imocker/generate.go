@@ -10,12 +10,14 @@ import (
 	"text/template"
 )
 
+// Mock describes an interface and its methods which will be used to generate a mock structure
 type Mock struct {
 	Package string
 	Name    string
 	Methods map[string]Method
 }
 
+// Method describes a method's parameters and return values
 type Method struct {
 	NamedParams    []NamedParam
 	NamedReturns   []NamedParam
@@ -23,6 +25,7 @@ type Method struct {
 	UnNamedReturns []string
 }
 
+// NamedParam describes a parameter or return value's variable name and type definition as a string
 type NamedParam struct {
 	Name string
 	Type string

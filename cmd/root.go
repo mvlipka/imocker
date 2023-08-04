@@ -28,5 +28,7 @@ func Execute() {
 }
 
 func rootRun(cmd *cobra.Command, args []string) {
-
+	if err := cmd.Help(); err != nil {
+		os.Exit(1)
+	}
 }
