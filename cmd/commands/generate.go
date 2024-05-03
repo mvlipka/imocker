@@ -19,22 +19,21 @@ var GenerateCmd = &cobra.Command{
 }
 
 func generateRun(cmd *cobra.Command, args []string) {
-	directory := "./..."
-	if len(args) == 1 {
-		directory = args[0]
+	directory, err := os.Getwd()
+	if err != nil {
+		panic(err)
 	}
 
-	// ./... would indicate current working directory
-	if directory == "./..." {
-		directory, _ = os.Getwd()
+	if len(args) == 1 {
+		directory = args[0]
 	}
 
 	fmt.Println(fmt.Sprintf("Generating mocks for %s and subdirectories", directory))
 
 	// Iterate files in every child directory compiling Go interfaces to Mocks
-	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("error walking directory: %w", err)
 		}
 
 		// Ignore non-Go source files and mock files
@@ -47,12 +46,12 @@ func generateRun(cmd *cobra.Command, args []string) {
 
 		f, err := os.Open(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("error opening file: %w", err)
 		}
 
 		mocks, err := imocker.ParseMock(f)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing mock: %w", err)
 		}
 
 		// Generate each mock
@@ -60,29 +59,33 @@ func generateRun(cmd *cobra.Command, args []string) {
 			fmt.Println("Iterating mocks")
 			output, err := imocker.GenerateTemplate(mock)
 			if err != nil {
-				return err
+				return fmt.Errorf("error generating template: %w", err)
 			}
 
 			// Create the mock file
-			fileName := strings.ToLower(fmt.Sprintf("%s\\mock_%s.go", currentDir, mock.Name))
+			fileName := fmt.Sprintf("%s_test.go", os.ExpandEnv(filepath.Join(currentDir, mock.Name)))
 			fmt.Println(fmt.Sprintf("Creating file %s", fileName))
 			mockFile, err := os.Create(fileName)
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error creating file: %w", err)
 			}
 
-			//// gofmt the mock
+			// gofmt the mock
 			formattedOutput, err := format.Source([]byte(output))
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error formatting source: %w", err)
 			}
 
 			// Write the mock
 			_, err = mockFile.Write(formattedOutput)
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error writing to sthe mock file: %w", err)
 			}
-			mockFile.Close()
+
+			_ = mockFile.Close()
 		}
 
 		return nil

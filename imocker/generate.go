@@ -67,7 +67,7 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 				for _, method := range typ.Methods.List {
 
 					// Check for a method else continue
-					switch methodTyp := method.Type.(type) {
+					switch methodType := method.Type.(type) {
 					case *ast.FuncType:
 						mockMethod := Method{
 							NamedParams:    make([]NamedParam, 0),
@@ -76,7 +76,7 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							UnNamedReturns: make([]string, 0),
 						}
 
-						for _, param := range methodTyp.Params.List {
+						for _, param := range methodType.Params.List {
 
 							// Check for parameters types else continue
 							switch paramTyp := param.Type.(type) {
@@ -95,7 +95,12 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							}
 						}
 
-						for _, ret := range methodTyp.Results.List {
+						// Skip interfaces with no expected return values
+						if methodType.Results == nil || methodType.Results.List == nil {
+							continue
+						}
+
+						for _, ret := range methodType.Results.List {
 
 							// Check for return types else continue
 							switch retTyp := ret.Type.(type) {
