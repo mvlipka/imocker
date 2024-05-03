@@ -63,7 +63,7 @@ func generateRun(cmd *cobra.Command, args []string) {
 			}
 
 			// Create the mock file
-			fileName := strings.ToLower(fmt.Sprintf("%s\\mock_%s.go", currentDir, mock.Name))
+			fileName := fmt.Sprintf("%s_test.go", os.ExpandEnv(filepath.Join(currentDir, mock.Name)))
 			fmt.Println(fmt.Sprintf("Creating file %s", fileName))
 			mockFile, err := os.Create(fileName)
 			if err != nil {
