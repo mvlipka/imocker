@@ -24,10 +24,10 @@ func generateRun(cmd *cobra.Command, args []string) {
 		directory = args[0]
 	}
 
-	// ./... would indicate current working directory
-	if directory == "./..." {
-		directory, _ = os.Getwd()
-	}
+	//// ./... would indicate current working directory
+	//if directory == "./..." {
+	//	directory, _ = os.Getwd()
+	//}
 
 	fmt.Println(fmt.Sprintf("Generating mocks for %s and subdirectories", directory))
 
@@ -47,12 +47,12 @@ func generateRun(cmd *cobra.Command, args []string) {
 
 		f, err := os.Open(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("error opening file: %w", err)
 		}
 
 		mocks, err := imocker.ParseMock(f)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing mock: %w", err)
 		}
 
 		// Generate each mock
@@ -60,7 +60,7 @@ func generateRun(cmd *cobra.Command, args []string) {
 			fmt.Println("Iterating mocks")
 			output, err := imocker.GenerateTemplate(mock)
 			if err != nil {
-				return err
+				return fmt.Errorf("error generating template: %w", err)
 			}
 
 			// Create the mock file
@@ -68,21 +68,26 @@ func generateRun(cmd *cobra.Command, args []string) {
 			fmt.Println(fmt.Sprintf("Creating file %s", fileName))
 			mockFile, err := os.Create(fileName)
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error creating file: %w", err)
+
 			}
 
-			//// gofmt the mock
+			// gofmt the mock
 			formattedOutput, err := format.Source([]byte(output))
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error formatting source: %w", err)
 			}
 
 			// Write the mock
 			_, err = mockFile.Write(formattedOutput)
 			if err != nil {
-				return err
+				_ = mockFile.Close()
+				return fmt.Errorf("error writing to sthe mock file: %w", err)
 			}
-			mockFile.Close()
+
+			_ = mockFile.Close()
 		}
 
 		return nil

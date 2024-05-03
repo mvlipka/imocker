@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"io"
+	"log"
 	"text/template"
 )
 
@@ -93,6 +94,12 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							default:
 								continue
 							}
+						}
+
+						// Skip interfaces with no expected return values
+						if methodTyp.Results == nil || methodTyp.Results.List == nil {
+							log.Println(fmt.Sprintf("No return values %s.%s, skipping", name, method.Names[0].Name))
+							continue
 						}
 
 						for _, ret := range methodTyp.Results.List {
