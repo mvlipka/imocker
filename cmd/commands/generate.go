@@ -69,7 +69,6 @@ func generateRun(cmd *cobra.Command, args []string) {
 			if err != nil {
 				_ = mockFile.Close()
 				return fmt.Errorf("error creating file: %w", err)
-
 			}
 
 			// gofmt the mock
