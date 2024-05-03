@@ -19,22 +19,21 @@ var GenerateCmd = &cobra.Command{
 }
 
 func generateRun(cmd *cobra.Command, args []string) {
-	directory := "./..."
+	directory, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
 	if len(args) == 1 {
 		directory = args[0]
 	}
 
-	//// ./... would indicate current working directory
-	//if directory == "./..." {
-	//	directory, _ = os.Getwd()
-	//}
-
 	fmt.Println(fmt.Sprintf("Generating mocks for %s and subdirectories", directory))
 
 	// Iterate files in every child directory compiling Go interfaces to Mocks
-	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("error walking directory: %w", err)
 		}
 
 		// Ignore non-Go source files and mock files
