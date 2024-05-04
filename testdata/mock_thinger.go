@@ -4,6 +4,8 @@ type MockThinger struct {
 	TestMyFunc func(param string) (string, error)
 
 	TestNamedReturn func(multiple bool, types bool) (err error)
+
+	TestMethodWithNoReturns func()
 }
 
 func (m *MockThinger) MyFunc(param string) (string, error) {
@@ -12,4 +14,8 @@ func (m *MockThinger) MyFunc(param string) (string, error) {
 
 func (m *MockThinger) NamedReturn(multiple bool, types bool) (err error) {
 	return m.TestNamedReturn(multiple, types)
+}
+
+func (m *MockThinger) MethodWithNoReturns() {
+	m.TestMethodWithNoReturns()
 }

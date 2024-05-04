@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 var VersionCmd = &cobra.Command{
@@ -12,5 +12,5 @@ var VersionCmd = &cobra.Command{
 }
 
 func versionRun(cmd *cobra.Command, args []string) {
-	fmt.Println("0.0.0a")
+	log.Println("0.0.0a")
 }

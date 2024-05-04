@@ -23,6 +23,7 @@ type Method struct {
 	NamedReturns   []NamedParam
 	UnNamedParams  []string
 	UnNamedReturns []string
+	HasReturns     bool
 }
 
 // NamedParam describes a parameter or return value's variable name and type definition as a string
@@ -51,7 +52,7 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 	// Build up mock objects
 	for name, obj := range f.Scope.Objects {
 
-		// check if token is `type`
+		// Check if token is `type`
 		switch declType := obj.Decl.(type) {
 		case *ast.TypeSpec:
 
@@ -74,6 +75,7 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							NamedReturns:   make([]NamedParam, 0),
 							UnNamedParams:  make([]string, 0),
 							UnNamedReturns: make([]string, 0),
+							HasReturns:     false,
 						}
 
 						for _, param := range methodType.Params.List {
@@ -95,27 +97,27 @@ func ParseMock(reader io.Reader) ([]Mock, error) {
 							}
 						}
 
-						// Skip interfaces with no expected return values
-						if methodType.Results == nil || methodType.Results.List == nil {
-							continue
-						}
+						// Check if method has return values
+						if methodType.Results != nil && methodType.Results.List != nil {
+							mockMethod.HasReturns = true
 
-						for _, ret := range methodType.Results.List {
+							for _, ret := range methodType.Results.List {
 
-							// Check for return types else continue
-							switch retTyp := ret.Type.(type) {
-							case *ast.Ident:
-								if len(ret.Names) > 0 {
-									mockMethod.NamedReturns = append(mockMethod.NamedReturns, NamedParam{
-										Name: ret.Names[0].Name,
-										Type: retTyp.Name,
-									})
-								} else {
-									mockMethod.UnNamedReturns = append(mockMethod.UnNamedReturns, retTyp.Name)
+								// Check for return types else continue
+								switch retTyp := ret.Type.(type) {
+								case *ast.Ident:
+									if len(ret.Names) > 0 {
+										mockMethod.NamedReturns = append(mockMethod.NamedReturns, NamedParam{
+											Name: ret.Names[0].Name,
+											Type: retTyp.Name,
+										})
+									} else {
+										mockMethod.UnNamedReturns = append(mockMethod.UnNamedReturns, retTyp.Name)
+									}
+									break
+								default:
+									continue
 								}
-								break
-							default:
-								continue
 							}
 						}
 

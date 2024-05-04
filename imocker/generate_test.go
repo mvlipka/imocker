@@ -17,10 +17,12 @@ func TestParseFile(t *testing.T) {
 	assert.NoError(t, err)
 	require.Len(t, mocks, 1)
 
-	require.Len(t, mocks[0].Methods, 2)
+	require.Len(t, mocks[0].Methods, 3)
 	require.Contains(t, mocks[0].Methods, "MyFunc")
 
 	myFunc := mocks[0].Methods["MyFunc"]
+	require.True(t, myFunc.HasReturns)
+
 	assert.Len(t, myFunc.NamedParams, 1)
 	require.Contains(t, myFunc.NamedParams[0].Name, "param")
 	assert.Contains(t, myFunc.NamedParams[0].Type, "string")
@@ -28,6 +30,8 @@ func TestParseFile(t *testing.T) {
 	require.Len(t, myFunc.UnNamedReturns, 2)
 	assert.Contains(t, myFunc.UnNamedReturns[0], "string")
 	assert.Contains(t, myFunc.UnNamedReturns[1], "error")
+
+	require.Contains(t, mocks[0].Methods, "MethodWithNoReturns")
 }
 
 func TestGenerateTemplate(t *testing.T) {
@@ -47,6 +51,7 @@ func TestGenerateTemplate(t *testing.T) {
 				UnNamedReturns: []string{
 					"error",
 				},
+				HasReturns: true,
 			},
 		},
 	})
