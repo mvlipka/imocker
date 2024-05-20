@@ -70,7 +70,7 @@ func walkDirectoryFn(path string, d fs.DirEntry, err error) error {
 		}
 
 		// Create the mock file
-		fileName := fmt.Sprintf("%s_test.go", os.ExpandEnv(filepath.Join(currentDir, strings.ToLower(mock.Name))))
+		fileName := fmt.Sprintf("%s_mock.go", os.ExpandEnv(filepath.Join(currentDir, strings.ToLower(mock.Name))))
 		log.Println(fmt.Sprintf("Creating file %s", fileName))
 		mockFile, err := os.Create(fileName)
 		if err != nil {
